@@ -1,1 +1,314 @@
 # Lab-5
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+void initArray(int *arr, int n) {
+    for(int i = 0; i < n; i++) {
+        arr[i] = rand() % 100;
+    }
+}
+
+void printArray(int *arr, int n) {
+    if(arr == NULL) {
+        printf("Array is not initialized.\n");
+        return;
+    }
+    printf("Array: ");
+    for(int i = 0; i < n; i++) {
+        printf("%d ", arr[i]);
+    }
+    printf("\n");
+}
+
+void selectionSort(int *arr, int n) {
+    for(int i = 0; i < n-1; i++) {
+        int min_idx = i;
+        for(int j = i+1; j < n; j++) {
+            if(arr[j] < arr[min_idx]) {
+                min_idx = j;
+            }
+        }
+        int tmp = arr[i];
+        arr[i] = arr[min_idx];
+        arr[min_idx] = tmp;
+    }
+}
+
+void insertionSort(int *arr, int n) {
+    for(int i = 1; i < n; i++) {
+        int key = arr[i];
+        int j = i - 1;
+        while(j >= 0 && arr[j] > key) {
+            arr[j+1] = arr[j];
+            j--;
+        }
+        arr[j+1] = key;
+    }
+}
+
+void bubbleSort(int *arr, int n) {
+    for(int i = 0; i < n-1; i++) {
+        for(int j = 0; j < n-1-i; j++) {
+            if(arr[j] > arr[j+1]) {
+                int tmp = arr[j];
+                arr[j] = arr[j+1];
+                arr[j+1] = tmp;
+            }
+        }
+    }
+}
+
+void merge(int *arr, int l, int m, int r) {
+    int n1 = m - l + 1;
+    int n2 = r - m;
+    int *L = (int*)malloc(n1 * sizeof(int));
+    int *R = (int*)malloc(n2 * sizeof(int));
+    for(int i = 0; i < n1; i++) L[i] = arr[l + i];
+    for(int j = 0; j < n2; j++) R[j] = arr[m + 1 + j];
+    int i = 0, j = 0, k = l;
+    while(i < n1 && j < n2) {
+        if(L[i] <= R[j]) {
+            arr[k++] = L[i++];
+        } else {
+            arr[k++] = R[j++];
+        }
+    }
+    while(i < n1) arr[k++] = L[i++];
+    while(j < n2) arr[k++] = R[j++];
+    free(L);
+    free(R);
+}
+
+void mergeSort(int *arr, int l, int r) {
+    if(l < r) {
+        int m = l + (r - l) / 2;
+        mergeSort(arr, l, m);
+        mergeSort(arr, m+1, r);
+        merge(arr, l, m, r);
+    }
+}
+
+int partition(int *arr, int low, int high) {
+    int pivot = arr[high];
+    int i = low - 1;
+    for(int j = low; j < high; j++) {
+        if(arr[j] < pivot) {
+            i++;
+            int tmp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = tmp;
+        }
+    }
+    int tmp = arr[i+1];
+    arr[i+1] = arr[high];
+    arr[high] = tmp;
+    return i+1;
+}
+
+void quickSort(int *arr, int low, int high) {
+    if(low < high) {
+        int pi = partition(arr, low, high);
+        quickSort(arr, low, pi-1);
+        quickSort(arr, pi+1, high);
+    }
+}
+
+void heapify(int *arr, int n, int i) {
+    int largest = i;
+    int l = 2*i + 1;
+    int r = 2*i + 2;
+    if(l < n && arr[l] > arr[largest]) largest = l;
+    if(r < n && arr[r] > arr[largest]) largest = r;
+    if(largest != i) {
+        int tmp = arr[i];
+        arr[i] = arr[largest];
+        arr[largest] = tmp;
+        heapify(arr, n, largest);
+    }
+}
+
+void heapSort(int *arr, int n) {
+    for(int i = n/2 - 1; i >= 0; i--) {
+        heapify(arr, n, i);
+    }
+    for(int i = n-1; i >= 0; i--) {
+        int tmp = arr[0];
+        arr[0] = arr[i];
+        arr[i] = tmp;
+        heapify(arr, i, 0);
+    }
+}
+
+int linearSearch(int *arr, int n, int x) {
+    for(int i = 0; i < n; i++) {
+        if(arr[i] == x) return i;
+    }
+    return -1;
+}
+
+int binarySearch(int *arr, int left, int right, int x) {
+    while(left <= right) {
+        int mid = left + (right - left) / 2;
+        if(arr[mid] == x) return mid;
+        else if(arr[mid] < x) left = mid + 1;
+        else right = mid - 1;
+    }
+    return -1;
+}
+
+void fibFast(unsigned long long n, unsigned long long *fn, unsigned long long *fn1) {
+    if(n == 0) {
+        *fn = 0;
+        *fn1 = 1;
+        return;
+    }
+    unsigned long long a, b;
+    fibFast(n >> 1, &a, &b);
+    unsigned long long c, d;
+    __uint128_t t1 = (__uint128_t)a * ((b << 1) - a);
+    __uint128_t t2 = (__uint128_t)a * a + (__uint128_t)b * b;
+    c = (unsigned long long) t1;
+    d = (unsigned long long) t2;
+    if(n & 1) {
+        *fn = d;
+        *fn1 = c + d;
+    } else {
+        *fn = c;
+        *fn1 = d;
+    }
+}
+
+int main() {
+    srand(time(NULL));
+    int *arr = NULL;
+    int n = 0;
+    int choice;
+    do {
+        printf("\nMenu:\n");
+        printf("1. Initialize array\n");
+        printf("2. Print array\n");
+        printf("3. Free array\n");
+        printf("4. Selection sort\n");
+        printf("5. Insertion sort\n");
+        printf("6. Bubble sort\n");
+        printf("7. Merge sort\n");
+        printf("8. Quick sort\n");
+        printf("9. Heap sort\n");
+        printf("10. Linear search\n");
+        printf("11. Binary search\n");
+        printf("12. Fibonacci (fast doubling)\n");
+        printf("0. Exit\n");
+        printf("Choose an option: ");
+        scanf("%d", &choice);
+        if(choice == 1) {
+            if(arr != NULL) {
+                free(arr);
+                arr = NULL;
+            }
+            printf("Enter array size: ");
+            scanf("%d", &n);
+            arr = (int*)malloc(n * sizeof(int));
+            if(arr == NULL) {
+                printf("Memory allocation failed\n");
+                n = 0;
+            } else {
+                initArray(arr, n);
+                printf("Array initialized with random values.\n");
+            }
+        } else if(choice == 2) {
+            if(arr == NULL) {
+                printf("Array not initialized.\n");
+            } else {
+                printArray(arr, n);
+            }
+        } else if(choice == 3) {
+            if(arr != NULL) {
+                free(arr);
+                arr = NULL;
+                n = 0;
+                printf("Array memory freed.\n");
+            } else {
+                printf("Array is already empty.\n");
+            }
+        } else if(choice == 4) {
+            if(arr == NULL) {
+                printf("Initialize array first.\n");
+            } else {
+                selectionSort(arr, n);
+                printf("Selection sort done.\n");
+            }
+        } else if(choice == 5) {
+            if(arr == NULL) {
+                printf("Initialize array first.\n");
+            } else {
+                insertionSort(arr, n);
+                printf("Insertion sort done.\n");
+            }
+        } else if(choice == 6) {
+            if(arr == NULL) {
+                printf("Initialize array first.\n");
+            } else {
+                bubbleSort(arr, n);
+                printf("Bubble sort done.\n");
+            }
+        } else if(choice == 7) {
+            if(arr == NULL) {
+                printf("Initialize array first.\n");
+            } else {
+                mergeSort(arr, 0, n-1);
+                printf("Merge sort done.\n");
+            }
+        } else if(choice == 8) {
+            if(arr == NULL) {
+                printf("Initialize array first.\n");
+            } else {
+                quickSort(arr, 0, n-1);
+                printf("Quick sort done.\n");
+            }
+        } else if(choice == 9) {
+            if(arr == NULL) {
+                printf("Initialize array first.\n");
+            } else {
+                heapSort(arr, n);
+                printf("Heap sort done.\n");
+            }
+        } else if(choice == 10) {
+            if(arr == NULL) {
+                printf("Initialize array first.\n");
+            } else {
+                printf("Enter value to search: ");
+                int x;
+                scanf("%d", &x);
+                int res = linearSearch(arr, n, x);
+                if(res >= 0) printf("Value %d found at index %d.\n", x, res);
+                else printf("Value %d not found.\n", x);
+            }
+        } else if(choice == 11) {
+            if(arr == NULL) {
+                printf("Initialize array first.\n");
+            } else {
+                printf("Ensure array is sorted for binary search.\n");
+                printf("Enter value to search: ");
+                int x;
+                scanf("%d", &x);
+                int res = binarySearch(arr, 0, n-1, x);
+                if(res >= 0) printf("Value %d found at index %d.\n", x, res);
+                else printf("Value %d not found.\n", x);
+            }
+        } else if(choice == 12) {
+            printf("Enter position N for Fibonacci: ");
+            unsigned long long N;
+            scanf("%llu", &N);
+            unsigned long long fn, fn1;
+            fibFast(N, &fn, &fn1);
+            printf("Fib(%llu) = %llu\n", N, fn);
+        } else if(choice == 0) {
+            printf("Exiting program.\n");
+        } else {
+            printf("Invalid option.\n");
+        }
+    } while(choice != 0);
+    if(arr != NULL) free(arr);
+    return 0;
+}
